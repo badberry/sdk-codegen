@@ -1,4 +1,12 @@
-# ---> Java
+#idea project file
+*.iml
+
+#idea project cache directory
+.idea/
+
+#maven target directory
+target/
+
 *.class
 
 # Mobile Tools for Java (J2ME)
