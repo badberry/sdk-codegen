@@ -1,3 +1,1 @@
-# sdk-codegen
-
-sdk代码生成
+#sdk-codegen
