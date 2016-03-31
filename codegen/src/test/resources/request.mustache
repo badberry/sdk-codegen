@@ -1,0 +1,101 @@
+package {{packageName}};
+
+import cn.cloudtop.common.api.basic.HttpMethod;
+import cn.cloudtop.common.api.basic.RestRequest;
+{{#hasUrlParams}}
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+{{/hasUrlParams}}
+import com.google.common.collect.Maps;
+
+{{#hasUrlParams}}
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+{{/hasUrlParams}}
+import java.util.Map;
+{{#imports}}
+    import {{packageName}}.{{className}};
+{{/imports}}
+
+/**
+ * Created by codeGen on {{createTime}}.
+ *
+ * {{desc}}
+ */
+public class {{className}} implements RestRequest<{{referenceProperty.name}}> {
+
+    {{#properties}}
+    private {{type}} {{name}}; //{{desc}}
+    {{/properties}}
+
+    {{#hasProperties}}
+    /**
+     *
+    {{#properties}}
+     * @param {{name}}  {{desc}}
+    {{/properties}}
+     */
+    {{/hasProperties}}
+    public {{className}}({{#properties}}{{type}} {{name}}{{^last}},{{/last}}{{/properties}}){
+        {{#properties}}
+        this.{{name}}={{name}};
+        {{/properties}}
+    }
+
+    /**
+     * 获取请求类型.
+     */
+    public HttpMethod getMethod() {
+        return HttpMethod.{{method}};
+    }
+
+    /**
+     * 获取请求地址.
+     */
+    public String getUrl() {
+        {{#hasUrlParams}}
+        try {
+            String url = "{{url}}";
+            Map urlParams = Maps.newHashMap();
+            {{#urlParams}}
+            urlParams.put("{{name}}",this.{{referenceProperty.name}});
+            {{/urlParams}}
+            MustacheFactory mf = new DefaultMustacheFactory();
+            Mustache mustache = mf.compile(new StringReader(url), "url.template");
+            StringWriter writer = new StringWriter();
+            mustache.execute(writer, urlParams).flush();
+            return writer.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        {{/hasUrlParams}}
+        {{^hasUrlParams}}
+        return "{{url}}";
+        {{/hasUrlParams}}
+    }
+
+    /**
+     * 获取请求参数.
+     */
+    public Map<String, Object> getParameters() {
+        {{#hasParams}}
+        Map params = Maps.newHashMap();
+        {{#params}}
+        params.put("{{name}}",this.{{referenceProperty.name}});
+        {{/params}}
+        return params;
+        {{/hasParams}}
+        {{^hasParams}}
+        return  Maps.newHashMap();
+        {{/hasParams}}
+    }
+
+    /**
+     * 获取返回类型.
+     */
+    public Class<{{referenceResponse.className}}> responseClass() {
+        return {{referenceResponse.className}}.class;
+    }
+}
