@@ -10,4 +10,9 @@ public class ViewObjectClassDefine extends PojoInfo {
                                  String desc, List<PropertyInfo> properties) {
         super(packageName, className, desc, properties);
     }
+
+    @Override
+    public String toString() {
+        return String.format("view-object:%s",this.baseToString());
+    }
 }

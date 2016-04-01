@@ -57,5 +57,22 @@ public class PojoInfo {
         return getters;
     }
 
+    protected String baseToString() {
+        String classStr = String.format("%s.%s //%s", this.packageName, this.className, this.desc);
+        String propertyStr = "";
+        for (PropertyInfo property : this.properties) {
+            propertyStr += String.format("\t%s\n", property);
+        }
+        return String.format("%s\n%s", classStr, propertyStr);
+    }
 
+    @Override
+    public String toString() {
+        String classStr = String.format("pojo:%s.%s //%s", this.packageName, this.className, this.desc);
+        String propertyStr = "";
+        for (PropertyInfo property : this.properties) {
+            propertyStr += String.format("\t%s\n", property);
+        }
+        return String.format("%s\n%s", classStr, propertyStr);
+    }
 }

@@ -17,10 +17,15 @@ public class ResponseClassDefine extends PojoInfo {
     public List<PojoInfo> imports() {
         List<PojoInfo> imports = Lists.newArrayList();
         for (PropertyInfo property : this.getProperties()) {
-            if (property.getReference() != null) {
-                imports.add(property.getReference());
+            if (property.isReference()) {
+                imports.add(property.getReferenceClass());
             }
         }
         return imports;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("response:%s",this.baseToString());
     }
 }

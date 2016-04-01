@@ -7,7 +7,8 @@ public class PropertyInfo {
 
     private String name;
     private String type;
-    private PojoInfo reference = null;
+    private boolean reference = false;
+    private PojoInfo referenceClass = null;
     private String desc;
     private boolean last = false;
 
@@ -17,9 +18,10 @@ public class PropertyInfo {
         this.desc = desc;
     }
 
-    public PropertyInfo(String name, String type, String desc, PojoInfo reference) {
+    public PropertyInfo(String name, String type, String desc, PojoInfo referenceClass) {
         this(name, type, desc);
-        this.reference = reference;
+        this.reference = true;
+        this.referenceClass = referenceClass;
     }
 
     public PropertyInfo(String name, String type, String desc, boolean last) {
@@ -27,9 +29,10 @@ public class PropertyInfo {
         this.last = last;
     }
 
-    public PropertyInfo(String name, String type, String desc, PojoInfo reference, boolean last) {
+    public PropertyInfo(String name, String type, String desc, PojoInfo referenceClass, boolean last) {
         this(name, type, desc, last);
-        this.reference = reference;
+        this.reference = true;
+        this.referenceClass = referenceClass;
     }
 
     public String getName() {
@@ -44,11 +47,25 @@ public class PropertyInfo {
         return desc;
     }
 
-    public PojoInfo getReference() {
+    public boolean isReference() {
         return reference;
+    }
+
+    public PojoInfo getReferenceClass() {
+        return referenceClass;
     }
 
     public boolean isLast() {
         return last;
+    }
+
+    public void setRef(PojoInfo ref) {
+        this.reference = true;
+        this.referenceClass = ref;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("property:%s %s //%s", this.type, this.name, this.desc);
     }
 }

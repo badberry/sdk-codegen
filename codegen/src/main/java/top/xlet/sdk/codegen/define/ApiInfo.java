@@ -7,17 +7,21 @@ import java.util.List;
  */
 public class ApiInfo {
 
+    private String url;
     private String name;
     private RequestClassDefine request;
     private ResponseClassDefine response;
     private List<ViewObjectClassDefine> vos;
 
-    public ApiInfo(String name, RequestClassDefine request, ResponseClassDefine response,
-                   List<ViewObjectClassDefine> vos) {
-        this.name = name;
-        this.request = request;
-        this.response = response;
-        this.vos = vos;
+    public ApiInfo() {
+    }
+
+    void url(String url) {
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public String getName() {
