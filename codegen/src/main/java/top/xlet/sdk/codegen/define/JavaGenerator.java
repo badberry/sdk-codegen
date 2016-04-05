@@ -26,6 +26,7 @@ public class JavaGenerator implements Generator {
         PomDefine pomDef = new PomDefine("cn.cloudtop.sdks", service + "-sdk", version);
 
         MustacheFactory mf = new DefaultMustacheFactory();
+        //todo:add deploy config in pom.xml
         Mustache mustache = mf.compile("java/pom.xml.mustache");
         mustache.execute(new FileWriter(projectDir + File.separator + "pom.xml"), pomDef).flush();
 
