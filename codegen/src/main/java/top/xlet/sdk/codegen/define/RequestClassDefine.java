@@ -15,13 +15,12 @@ public class RequestClassDefine extends PojoInfo {
 
     public RequestClassDefine(String packageName, String className, String desc,
                               List<PropertyInfo> properties, String method, String url, List<ParamInfo> urlParams,
-                              List<ParamInfo> params, ResponseClassDefine referenceResponse) {
+                              List<ParamInfo> params) {
         super(packageName, className, desc, properties);
         this.method = method;
         this.url = url;
         this.urlParams = urlParams;
         this.params = params;
-        this.referenceResponse = referenceResponse;
     }
 
     public String getMethod() {
@@ -50,5 +49,9 @@ public class RequestClassDefine extends PojoInfo {
 
     public ResponseClassDefine getReferenceResponse() {
         return referenceResponse;
+    }
+
+    public void response(ResponseClassDefine response) {
+        this.referenceResponse = response;
     }
 }

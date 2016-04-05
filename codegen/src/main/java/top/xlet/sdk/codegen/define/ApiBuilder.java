@@ -1,15 +1,12 @@
 package top.xlet.sdk.codegen.define;
 
 import com.google.common.collect.Lists;
-import io.swagger.models.HttpMethod;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Response;
+import com.google.common.collect.Maps;
+import io.swagger.models.*;
 import io.swagger.models.parameters.AbstractSerializableParameter;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,31 +21,76 @@ public class ApiBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiBuilder.class);
 
-    private Map<String, ResponseClassDefine> responseDefMap;
-    private Map<String, ViewObjectClassDefine> voDefMap;
-    private ApiInfo apiInfo = new ApiInfo();
+    private Map<String, PojoInfo> pojos;
+    private String url;
+    private String basePackage;
 
-    public ApiBuilder responses(Map<String, ResponseClassDefine> responseDefMap) {
-        this.responseDefMap = responseDefMap;
+    public ApiBuilder pojos(Map<String, PojoInfo> pojos) {
+        this.pojos = pojos;
         return this;
     }
 
-    public ApiBuilder vos(Map<String, ViewObjectClassDefine> voDefMap) {
-        this.voDefMap = voDefMap;
+    public ApiBuilder basePackage(String basePackage) {
+        this.basePackage = basePackage;
         return this;
     }
 
     public ApiBuilder path(String path) {
-        LOGGER.info("set api url={}", path);
-        apiInfo.url(path);
+        this.url = path;
         return this;
     }
 
-    private List<PropertyInfo> properties = Lists.newArrayList();
-    private List<ParamInfo> urlParams = Lists.newArrayList();
-    private List<ParamInfo> params = Lists.newArrayList();
+    public ApiInfo build(Path path) {
+        Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+        if (operationMap.size() > 1) {
+            throw new RuntimeException(String.format("api %s not set method", this.url));
+        }
 
-    private void params(List<Parameter> parameters) {
+        HttpMethod apiMethod = null;
+        Operation apiOperation = null;
+        for (HttpMethod method : operationMap.keySet()) {
+            apiMethod = method;
+            apiOperation = operationMap.get(method);
+        }
+
+        if (apiMethod == null || apiOperation == null) {
+            throw new RuntimeException("method or operation is null!");
+        }
+
+        String name = apiOperation.getSummary();
+        String desc = apiOperation.getDescription();
+        String method = apiMethod.toString();
+
+        ResponseClassDefine response = this.response(apiOperation);
+        RequestClassDefine request = this.request(apiOperation, method, desc);
+        List<ViewObjectClassDefine> vos = this.vos(request, response);
+
+        return new ApiInfo(this.url, name, request, response, vos);
+    }
+
+    public ResponseClassDefine response(Operation apiOperation) {
+        Response okResponse = apiOperation.getResponses().get("200");
+        if (okResponse == null) {
+            throw new RuntimeException("api not ok[200] response");
+        }
+        if (!okResponse.getSchema().getType().equals("ref")) {
+            throw new RuntimeException("not support response type is not ref type!");
+        }
+        RefProperty ref = (RefProperty) okResponse.getSchema();
+        String responseType = ref.getSimpleRef();
+        ResponseClassDefine response = (ResponseClassDefine) this.pojos.get(responseType);
+        if (response == null) {
+            throw new RuntimeException(String.format("response type[%d] is not exists!", responseType));
+        }
+        return response;
+    }
+
+    public RequestClassDefine request(Operation apiOperation, String method, String desc) {
+        List<Parameter> parameters = apiOperation.getParameters();
+
+        List<PropertyInfo> properties = Lists.newArrayList();
+        List<ParamInfo> urlParams = Lists.newArrayList();
+        List<ParamInfo> params = Lists.newArrayList();
         for (Parameter parameter : parameters) {
             String paramName = parameter.getName();
             String paramDesc = parameter.getDescription();
@@ -63,10 +105,15 @@ public class ApiBuilder {
                     break;
                 case "body":
                     BodyParameter bodyParameter = (BodyParameter) parameter;
-                    String bodyType = bodyParameter.getSchema().getReference().replace("#/definitions/", "");
-                    PropertyInfo bodyParamProperty = new PropertyInfo(paramName, bodyType, paramDesc, this.getReference(bodyType));
-                    properties.add(bodyParamProperty);
-                    params.add(new ParamInfo(paramName, bodyParamProperty));
+                    if (bodyParameter.getSchema() instanceof RefModel) {
+                        RefModel bodyRef = (RefModel) bodyParameter.getSchema();
+                        String bodyType = bodyRef.getSimpleRef();
+                        PropertyInfo bodyParamProperty = new PropertyInfo(paramName, bodyType, paramDesc, this.pojos.get(bodyType));
+                        properties.add(bodyParamProperty);
+                        params.add(new ParamInfo(paramName, bodyParamProperty));
+                    } else {
+                        throw new RuntimeException("only support ref type in body parameter.");
+                    }
                     break;
                 case "query":
                 case "formData":
@@ -80,53 +127,33 @@ public class ApiBuilder {
                     throw new RuntimeException("not support parameter!");
             }
         }
+        String requestClassName = apiOperation.getOperationId().replace(String.format("Using%s", method.toUpperCase()), "");
+        RequestClassDefine request = new RequestClassDefine(basePackage + ".request", requestClassName, desc, properties, method,
+                this.url, urlParams, params);
+        return request;
     }
 
+    public List<ViewObjectClassDefine> vos(RequestClassDefine request, ResponseClassDefine response) {
+        Map<String, ViewObjectClassDefine> voMap = Maps.newHashMap();
 
-    private void response(Response response) {
-
-    }
-
-    public ApiInfo build(Path path) {
-        Map<HttpMethod, Operation> operationMap = path.getOperationMap();
-        if (operationMap.size() > 1) {
-            throw new RuntimeException(String.format("api %s not set method", this.apiInfo.getUrl()));
-        }
-
-        for (HttpMethod method : operationMap.keySet()) {
-            Operation operation = operationMap.get(method);
-            String name = operation.getSummary();
-            LOGGER.info("get name:{}", name);
-            String desc = operation.getDescription();
-            LOGGER.info("get desc:{}", desc);
-            String methodStr = method.toString();
-            LOGGER.info("get method:{}", methodStr);
-
-
-            List<Parameter> parameters = operation.getParameters();
-            LOGGER.info("get params size:{}", parameters.size());
-            this.params(parameters);
-
-            Response okResponse = operation.getResponses().get("200");
-            if (okResponse == null) {
-                throw new RuntimeException("api not ok[200] response");
-            }
-            if (okResponse.getSchema().getType().equals("ref")) {
-                RefProperty ref = (RefProperty) okResponse.getSchema();
-                String responseType = ref.getSimpleRef();
+        for (PropertyInfo property : request.getProperties()) {
+            if (property.isReference() && property.getReferenceClass() instanceof ViewObjectClassDefine) {
+                ViewObjectClassDefine voDefine = (ViewObjectClassDefine) property.getReferenceClass();
+                if (!voMap.containsKey(voDefine.getClassName())) {
+                    voMap.put(voDefine.getClassName(), voDefine);
+                }
             }
         }
-        return null;
-    }
 
-    private PojoInfo getReference(String type) {
-        if (this.voDefMap.containsKey(type)) {
-            return this.voDefMap.get(type);
-        } else if (this.responseDefMap.containsKey(type)) {
-            return this.responseDefMap.get(type);
-        } else {
-            throw new RuntimeException(String.format("reference type[%s] not found!", type));
+        for (PropertyInfo property : response.getProperties()) {
+            if (property.isReference() && property.getReferenceClass() instanceof ViewObjectClassDefine) {
+                ViewObjectClassDefine voDefine = (ViewObjectClassDefine) property.getReferenceClass();
+                if (!voMap.containsKey(voDefine.getClassName())) {
+                    voMap.put(voDefine.getClassName(), voDefine);
+                }
+            }
         }
+        return Lists.newArrayList(voMap.values());
     }
 
 

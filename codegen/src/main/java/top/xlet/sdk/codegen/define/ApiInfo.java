@@ -13,11 +13,14 @@ public class ApiInfo {
     private ResponseClassDefine response;
     private List<ViewObjectClassDefine> vos;
 
-    public ApiInfo() {
-    }
-
-    void url(String url) {
+    public ApiInfo(String url, String name, RequestClassDefine request,
+                   ResponseClassDefine response, List<ViewObjectClassDefine> vos) {
         this.url = url;
+        this.name = name;
+        this.request = request;
+        this.request.response(response);
+        this.response = response;
+        this.vos = vos;
     }
 
     public String getUrl() {
