@@ -41,11 +41,17 @@ public class App implements CommandLineRunner {
 
     public void run(String... strings) throws Exception {
         LOGGER.info("get api docs for codegen");
-        String url = "http://localhost:8090/v2/api-docs?group=codegen";
+        String language = "Java";
+        String baseDir = "/home/jackie/idea/";
+        String url = "http://localhost:8090/v2/api-docs?group=sample";
+
         OkHttpClient client = new OkHttpClient();
         Response response = client.newCall(new Request.Builder().url(url).get().build()).execute();
         String responseStr = response.body().string();
         Swagger swagger = new SwaggerParser().parse(responseStr);
+
+        Generator generator = GeneratorFactory.get(language);
+        generator.initProject(baseDir, "sample", swagger.getInfo().getVersion());
 
         Map<String, Model> definitions = swagger.getDefinitions();
         Map<String, PojoInfo> pojos = new DefineAnalyzer()
@@ -63,6 +69,8 @@ public class App implements CommandLineRunner {
                     .basePackage("cn.cloudtop.sdk.sample")
                     .path(key)
                     .build(path);
+            LOGGER.info(api.toString());
+            generator.generate(api);
         }
 
     }

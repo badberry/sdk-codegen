@@ -20,7 +20,7 @@ public class ApiDocsConfig {
     @Bean
     public Docket apiConfig() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("codegen")
+                .groupName("sample")
                 .apiInfo(apiInfo())
                 .select()
                 .paths(regex("/simple.*"))

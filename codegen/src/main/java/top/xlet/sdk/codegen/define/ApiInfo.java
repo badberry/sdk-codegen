@@ -42,4 +42,12 @@ public class ApiInfo {
     public List<ViewObjectClassDefine> getVos() {
         return vos;
     }
+
+    @Override
+    public String toString() {
+        String requestStr = this.request.toString();
+        String responseStr = this.response.toString();
+        String str = String.format("api:%s\n\t%s\n\t%s", this.name, requestStr, responseStr);
+        return str;
+    }
 }

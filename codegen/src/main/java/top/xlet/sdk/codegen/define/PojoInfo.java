@@ -61,7 +61,7 @@ public class PojoInfo {
         String classStr = String.format("%s.%s //%s", this.packageName, this.className, this.desc);
         String propertyStr = "";
         for (PropertyInfo property : this.properties) {
-            propertyStr += String.format("\t%s\n", property);
+            propertyStr += String.format("\t\t%s\n", property);
         }
         return String.format("%s\n%s", classStr, propertyStr);
     }
@@ -71,7 +71,7 @@ public class PojoInfo {
         String classStr = String.format("pojo:%s.%s //%s", this.packageName, this.className, this.desc);
         String propertyStr = "";
         for (PropertyInfo property : this.properties) {
-            propertyStr += String.format("\t%s\n", property);
+            propertyStr += String.format("\t\t%s\n", property);
         }
         return String.format("%s\n%s", classStr, propertyStr);
     }

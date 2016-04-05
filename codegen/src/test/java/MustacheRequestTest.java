@@ -37,8 +37,9 @@ public class MustacheRequestTest {
                 "cn.cloudtop.request", "CityGetRequest", "获取城市详细请求定义",
                 Lists.newArrayList(idProperty), "GET", "/sample/{{id}}", Lists.newArrayList(
                 new ParamInfo("id", idProperty)), Lists.newArrayList(
-                new ParamInfo("id", idProperty)), response
+                new ParamInfo("id", idProperty))
         );
+        request.response(response);
 
         MustacheFactory mf = new DefaultMustacheFactory();
         Mustache mustache = mf.compile("request.mustache");
@@ -62,8 +63,10 @@ public class MustacheRequestTest {
 
         RequestClassDefine request = new RequestClassDefine(
                 "cn.cloudtop.request", "CityGetRequest", "获取城市详细请求定义",
-                null, "GET", "/sample", null, null, response
+                null, "GET", "/sample", null, null
         );
+        request.response(response);
+
 
         MustacheFactory mf = new DefaultMustacheFactory();
         Mustache mustache = mf.compile("request.mustache");

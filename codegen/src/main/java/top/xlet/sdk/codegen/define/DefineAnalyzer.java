@@ -39,7 +39,7 @@ public class DefineAnalyzer {
         for (String className : definitions.keySet()) {
             Model model = definitions.get(className);
             String desc = model.getDescription();
-            LOGGER.info("get definition:{},desc:{}", className, desc);
+            LOGGER.debug("get definition:{},desc:{}", className, desc);
 
             List<PropertyInfo> classProperties = Lists.newArrayList();
             Map<String, Property> properties = model.getProperties();
@@ -49,12 +49,12 @@ public class DefineAnalyzer {
                 PropertyInfo propertyDef;
                 if (property instanceof RefProperty) {
                     String propertyType = ((RefProperty) property).getSimpleRef();
-                    LOGGER.info("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
+                    LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
                     propertyDef = new PropertyInfo(propertyName, propertyType, propertyDesc);
                     referenceProperties.add(propertyDef);
                 } else {
                     String propertyType = property.getType();
-                    LOGGER.info("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
+                    LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
                     propertyDef = new PropertyInfo(propertyName, propertyType, propertyDesc);
                 }
                 classProperties.add(propertyDef);

@@ -54,4 +54,11 @@ public class RequestClassDefine extends PojoInfo {
     public void response(ResponseClassDefine response) {
         this.referenceResponse = response;
     }
+
+    @Override
+    public String toString() {
+        String str = String.format("request:%s.%s //%s\n\t\turl:[%s]%s", this.getPackageName(), this.getClassName(), this.getDesc(),
+                this.method, this.url);
+        return str;
+    }
 }

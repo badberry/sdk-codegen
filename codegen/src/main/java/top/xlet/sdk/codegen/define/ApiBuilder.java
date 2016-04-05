@@ -94,7 +94,6 @@ public class ApiBuilder {
         for (Parameter parameter : parameters) {
             String paramName = parameter.getName();
             String paramDesc = parameter.getDescription();
-            LOGGER.info("get param:name={},desc={}", paramName, paramDesc);
             switch (parameter.getIn()) {
                 case "path":
                     PathParameter pathParameter = (PathParameter) parameter;
