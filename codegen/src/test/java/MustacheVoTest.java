@@ -12,6 +12,7 @@ import top.xlet.sdk.codegen.define.ViewObjectClassDefine;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 
 /**
  * Created by jackie on 16-3-30
@@ -31,7 +32,9 @@ public class MustacheVoTest {
 
         MustacheFactory mf = new DefaultMustacheFactory();
         Mustache mustache = mf.compile("vo.mustache");
-        mustache.execute(new FileWriter(define.getClassName() + ".java"), define).flush();
+        StringWriter writer = new StringWriter();
+        mustache.execute(writer, define).flush();
+        System.out.println(writer.toString());
     }
 
     @Test
@@ -49,12 +52,12 @@ public class MustacheVoTest {
 
     @Test
     public void test_pojo_toString() {
-        PojoInfo pojoInfo = new PojoInfo("cn.cloudtop.sdk.sample", "SimpleVo", "例子", Lists.newArrayList(
-                new PropertyInfo("id", "long", "唯一性标识"),
-                new PropertyInfo("name", "String", "名称"),
-                new PropertyInfo("provinceId", "long", "省份id", true)
-        ));
-        System.out.println(pojoInfo);
+//        PojoInfo pojoInfo = new PojoInfo("cn.cloudtop.sdk.sample", "SimpleVo", "例子", Lists.newArrayList(
+//                new PropertyInfo("id", "long", "唯一性标识"),
+//                new PropertyInfo("name", "String", "名称"),
+//                new PropertyInfo("provinceId", "long", "省份id", true)
+//        ));
+//        System.out.println(pojoInfo);
     }
 
     @Test

@@ -13,6 +13,6 @@ public class ViewObjectClassDefine extends PojoInfo {
 
     @Override
     public String toString() {
-        return String.format("view-object:%s",this.baseToString());
+        return String.format("view-object:%s", this.baseToString());
     }
 }

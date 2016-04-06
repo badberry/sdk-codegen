@@ -3,16 +3,17 @@ package top.xlet.sdk.codegen.define;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Map;
 
 /**
- *
+ * java 代码生成器.
  */
 public class JavaGenerator implements Generator {
 
@@ -20,6 +21,23 @@ public class JavaGenerator implements Generator {
 
     private String projectPath;
     private String sourcePath;
+    private Map<String, String> baseTypeMap;
+
+    public JavaGenerator() {
+        baseTypeMap = Maps.newHashMap();
+        baseTypeMap.put("int64", "long");
+        baseTypeMap.put("string", "String");
+        //todo: add other base type map.
+    }
+
+    @Override
+    public String getType(String type) {
+        if (this.baseTypeMap.containsKey(type)) {
+            return this.baseTypeMap.get(type);
+        } else {
+            throw new RuntimeException(String.format("not support type[%s]", type));
+        }
+    }
 
     @Override
     public void initProject(String baseDir, String service, String version) throws IOException {
@@ -44,19 +62,22 @@ public class JavaGenerator implements Generator {
 
     @Override
     public void generate(ApiInfo api) throws IOException {
+        LOGGER.info("generate request file");
         this.generateFile("java/request.mustache", api.getRequest());
+        LOGGER.info("generate response file");
         this.generateFile("java/response.mustache", api.getResponse());
+        LOGGER.info("generate vos file");
         for (ViewObjectClassDefine vo : api.getVos()) {
             this.generateFile("java/vo.mustache", vo);
         }
     }
 
-    private void generateFile(String template, PojoInfo data) throws IOException {
-        String packagePath = this.initPackage(data);
-        String filePath = packagePath + File.separator + String.format("%s.java", data.getClassName());
+    private void generateFile(String template, PojoInfo pojo) throws IOException {
+        String packagePath = this.initPackage(pojo);
+        String filePath = packagePath + File.separator + String.format("%s.java", pojo.getClassName());
         MustacheFactory mf = new DefaultMustacheFactory();
         Mustache mustache = mf.compile(template);
-        mustache.execute(new FileWriter(filePath), data).flush();
+        mustache.execute(new FileWriter(filePath), pojo).flush();
     }
 
     private String initPackage(PojoInfo pojoDef) {

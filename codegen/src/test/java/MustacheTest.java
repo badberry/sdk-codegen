@@ -69,13 +69,33 @@ public class MustacheTest {
     }
 
     @Test
-    public void test_spilt_package(){
+    public void test_spilt_package() {
         String packageName = "cn.cloudtop.sdk.sample.request";
         System.out.println(packageName);
         String[] dirs = packageName.split("\\.");
         System.out.println(dirs.length);
-        for (String dir:dirs){
+        for (String dir : dirs) {
             System.out.println(dir);
         }
+    }
+
+    @Test
+    public void test_boolean_string() {
+        boolean last = false;
+        System.out.println(last);
+        System.out.println(String.format("last is %b", last));
+        System.out.println(last);
+    }
+
+    @Test
+    public void test_request_url() throws IOException {
+        String url = "/simple/{{id}}";
+        Map urlParams = Maps.newHashMap();
+        urlParams.put("id", 1);
+        MustacheFactory mf = new DefaultMustacheFactory();
+        Mustache mustache = mf.compile(new StringReader(url), "url.template");
+        StringWriter writer = new StringWriter();
+        mustache.execute(writer, urlParams).flush();
+        System.out.println(writer.toString());
     }
 }

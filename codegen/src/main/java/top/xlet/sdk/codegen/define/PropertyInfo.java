@@ -66,6 +66,10 @@ public class PropertyInfo {
 
     @Override
     public String toString() {
-        return String.format("property:%s %s //%s", this.type, this.name, this.desc);
+        return String.format("property[last:%s]:%s %s //%s", String.valueOf(this.last), this.type, this.name, this.desc);
+    }
+
+    public void setLast() {
+        this.last = true;
     }
 }

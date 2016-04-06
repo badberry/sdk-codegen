@@ -20,15 +20,20 @@ public class DefineAnalyzer {
 
     private Map<String, Model> definitions;
     private String basePackage;
+    private Generator generator;
 
     public DefineAnalyzer definitions(Map<String, Model> definitions) {
         this.definitions = definitions;
         return this;
     }
 
-
     public DefineAnalyzer basePackage(String packageName) {
         this.basePackage = packageName;
+        return this;
+    }
+
+    public DefineAnalyzer generator(Generator generator) {
+        this.generator = generator;
         return this;
     }
 
@@ -57,8 +62,9 @@ public class DefineAnalyzer {
                     if (property.getFormat() != null && !property.getFormat().isEmpty()) {
                         propertyType = property.getFormat();
                     }
-                    LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
-                    propertyDef = new PropertyInfo(propertyName, propertyType, propertyDesc);
+                    String languageType = generator.getType(propertyType);
+                    LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, languageType, propertyDesc);
+                    propertyDef = new PropertyInfo(propertyName, languageType, propertyDesc);
                 }
                 classProperties.add(propertyDef);
             }
@@ -87,4 +93,6 @@ public class DefineAnalyzer {
         }
         return definitionMap;
     }
+
+
 }

@@ -11,6 +11,7 @@ import io.swagger.models.properties.RefProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ public class ApiBuilder {
     private Map<String, PojoInfo> pojos;
     private String url;
     private String basePackage;
+    private Generator generator;
 
     public ApiBuilder pojos(Map<String, PojoInfo> pojos) {
         this.pojos = pojos;
@@ -40,7 +42,12 @@ public class ApiBuilder {
         return this;
     }
 
-    public ApiInfo build(Path path) {
+    public ApiBuilder generator(Generator generator) {
+        this.generator = generator;
+        return this;
+    }
+
+    public void build(Path path) throws IOException {
         Map<HttpMethod, Operation> operationMap = path.getOperationMap();
         if (operationMap.size() > 1) {
             throw new RuntimeException(String.format("api %s not set method", this.url));
@@ -65,7 +72,9 @@ public class ApiBuilder {
         RequestClassDefine request = this.request(apiOperation, method, desc);
         List<ViewObjectClassDefine> vos = this.vos(request, response);
 
-        return new ApiInfo(this.url, name, request, response, vos);
+        ApiInfo api = new ApiInfo(this.url, name, request, response, vos);
+        LOGGER.info(api.toString());
+        generator.generate(api);
     }
 
     public ResponseClassDefine response(Operation apiOperation) {
@@ -95,14 +104,19 @@ public class ApiBuilder {
             String paramName = parameter.getName();
             String paramDesc = parameter.getDescription();
             switch (parameter.getIn()) {
-                case "path":
+                case "path": {
                     PathParameter pathParameter = (PathParameter) parameter;
                     String pathType = pathParameter.getType();
-                    PropertyInfo pathParamProperty = new PropertyInfo(paramName, pathType, paramDesc);
+                    if (pathParameter.getFormat() != null && !pathParameter.getFormat().isEmpty()) {
+                        pathType = pathParameter.getFormat();
+                    }
+                    String languageType = this.generator.getType(pathType);
+                    PropertyInfo pathParamProperty = new PropertyInfo(paramName, languageType, paramDesc);
                     properties.add(pathParamProperty);
                     urlParams.add(new ParamInfo(paramName, pathParamProperty));
                     break;
-                case "body":
+                }
+                case "body": {
                     BodyParameter bodyParameter = (BodyParameter) parameter;
                     if (bodyParameter.getSchema() instanceof RefModel) {
                         RefModel bodyRef = (RefModel) bodyParameter.getSchema();
@@ -114,24 +128,27 @@ public class ApiBuilder {
                         throw new RuntimeException("only support ref type in body parameter.");
                     }
                     break;
+                }
                 case "query":
-                case "formData":
+                case "formData": {
                     AbstractSerializableParameter normalParameter = (AbstractSerializableParameter) parameter;
                     String normalType = normalParameter.getType();
                     if (normalParameter.getFormat() != null && !normalParameter.getFormat().isEmpty()) {
                         normalType = normalParameter.getFormat();
                     }
-                    PropertyInfo normalProperty = new PropertyInfo(paramName, normalType, paramDesc);
+                    String languageType = this.generator.getType(normalType);
+                    PropertyInfo normalProperty = new PropertyInfo(paramName, languageType, paramDesc);
                     properties.add(normalProperty);
                     params.add(new ParamInfo(paramName, normalProperty));
                     break;
+                }
                 default:
                     throw new RuntimeException("not support parameter!");
             }
         }
         String requestClassName = apiOperation.getOperationId().replace(String.format("Using%s", method.toUpperCase()), "");
         RequestClassDefine request = new RequestClassDefine(basePackage + ".requests", requestClassName, desc, properties, method,
-                this.url, urlParams, params);
+                this.url.replace("{", "{{").replace("}", "}}"), urlParams, params);
         return request;
     }
 
@@ -151,4 +168,6 @@ public class ApiBuilder {
         }
         return Lists.newArrayList(voMap.values());
     }
+
+
 }

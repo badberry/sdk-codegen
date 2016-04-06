@@ -57,20 +57,19 @@ public class App implements CommandLineRunner {
         Map<String, PojoInfo> pojos = new DefineAnalyzer()
                 .definitions(definitions)
                 .basePackage("cn.cloudtop.sdk.sample")
+                .generator(generator)
                 .build();
 
         List<ApiInfo> apis = Lists.newArrayList();
         for (String key : swagger.getPaths().keySet()) {
             LOGGER.info("process path {}", key);
             Path path = swagger.getPath(key);
-
-            ApiInfo api = new ApiBuilder()
+            new ApiBuilder()
                     .pojos(pojos)
                     .basePackage("cn.cloudtop.sdk.sample")
                     .path(key)
+                    .generator(generator)
                     .build(path);
-            LOGGER.info(api.toString());
-            generator.generate(api);
         }
 
     }

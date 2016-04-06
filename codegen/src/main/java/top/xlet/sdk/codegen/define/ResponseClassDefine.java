@@ -26,6 +26,6 @@ public class ResponseClassDefine extends PojoInfo {
 
     @Override
     public String toString() {
-        return String.format("response:%s",this.baseToString());
+        return String.format("response:%s", this.baseToString());
     }
 }
