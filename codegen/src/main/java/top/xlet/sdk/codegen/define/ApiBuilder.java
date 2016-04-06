@@ -118,6 +118,9 @@ public class ApiBuilder {
                 case "formData":
                     AbstractSerializableParameter normalParameter = (AbstractSerializableParameter) parameter;
                     String normalType = normalParameter.getType();
+                    if (normalParameter.getFormat() != null && !normalParameter.getFormat().isEmpty()) {
+                        normalType = normalParameter.getFormat();
+                    }
                     PropertyInfo normalProperty = new PropertyInfo(paramName, normalType, paramDesc);
                     properties.add(normalProperty);
                     params.add(new ParamInfo(paramName, normalProperty));
@@ -127,7 +130,7 @@ public class ApiBuilder {
             }
         }
         String requestClassName = apiOperation.getOperationId().replace(String.format("Using%s", method.toUpperCase()), "");
-        RequestClassDefine request = new RequestClassDefine(basePackage + ".request", requestClassName, desc, properties, method,
+        RequestClassDefine request = new RequestClassDefine(basePackage + ".requests", requestClassName, desc, properties, method,
                 this.url, urlParams, params);
         return request;
     }
@@ -135,16 +138,10 @@ public class ApiBuilder {
     public List<ViewObjectClassDefine> vos(RequestClassDefine request, ResponseClassDefine response) {
         Map<String, ViewObjectClassDefine> voMap = Maps.newHashMap();
 
-        for (PropertyInfo property : request.getProperties()) {
-            if (property.isReference() && property.getReferenceClass() instanceof ViewObjectClassDefine) {
-                ViewObjectClassDefine voDefine = (ViewObjectClassDefine) property.getReferenceClass();
-                if (!voMap.containsKey(voDefine.getClassName())) {
-                    voMap.put(voDefine.getClassName(), voDefine);
-                }
-            }
-        }
+        List<PropertyInfo> allProperties = Lists.newArrayList(request.getProperties());
+        allProperties.addAll(response.getProperties());
 
-        for (PropertyInfo property : response.getProperties()) {
+        for (PropertyInfo property : allProperties) {
             if (property.isReference() && property.getReferenceClass() instanceof ViewObjectClassDefine) {
                 ViewObjectClassDefine voDefine = (ViewObjectClassDefine) property.getReferenceClass();
                 if (!voMap.containsKey(voDefine.getClassName())) {
@@ -154,6 +151,4 @@ public class ApiBuilder {
         }
         return Lists.newArrayList(voMap.values());
     }
-
-
 }

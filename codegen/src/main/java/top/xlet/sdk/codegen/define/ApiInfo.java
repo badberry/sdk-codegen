@@ -47,7 +47,11 @@ public class ApiInfo {
     public String toString() {
         String requestStr = this.request.toString();
         String responseStr = this.response.toString();
-        String str = String.format("api:%s\n\t%s\n\t%s", this.name, requestStr, responseStr);
+        String voStr = "";
+        for (ViewObjectClassDefine vo : this.getVos()) {
+            voStr += vo.toString();
+        }
+        String str = String.format("api:%s\n\t%s\n\t%s\n\t%s", this.name, requestStr, responseStr, voStr);
         return str;
     }
 }

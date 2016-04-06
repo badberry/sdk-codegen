@@ -54,6 +54,9 @@ public class DefineAnalyzer {
                     referenceProperties.add(propertyDef);
                 } else {
                     String propertyType = property.getType();
+                    if (property.getFormat() != null && !property.getFormat().isEmpty()) {
+                        propertyType = property.getFormat();
+                    }
                     LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
                     propertyDef = new PropertyInfo(propertyName, propertyType, propertyDesc);
                 }

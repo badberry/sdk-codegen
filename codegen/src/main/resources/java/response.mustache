@@ -1,0 +1,40 @@
+package {{packageName}};
+
+import cn.cloudtop.common.api.basic.RestResponse;
+{{#imports}}
+import {{packageName}}.{{className}};
+{{/imports}}
+
+/**
+ * Created by codeGen on {{createTime}}.
+ *
+ * {{desc}}
+ */
+public class {{className}} extends RestResponse {
+
+    {{#properties}}
+    private {{type}} {{name}}; //{{desc}}
+    {{/properties}}
+
+    /**
+     * 构造函数.
+    {{#properties}}
+     * @param {{name}}  {{desc}}
+    {{/properties}}
+     */
+    public {{className}}({{#properties}}{{type}} {{name}}{{^last}},{{/last}}{{/properties}}){
+        {{#properties}}
+        this.{{name}}={{name}};
+        {{/properties}}
+    }
+
+    {{#getters}}
+    /**
+    * 获取{{desc}}
+    */
+    public {{type}} get{{name}}() {
+        return {{property}};
+    }
+
+    {{/getters}}
+}

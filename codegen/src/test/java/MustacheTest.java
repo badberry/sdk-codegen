@@ -67,4 +67,15 @@ public class MustacheTest {
         mustache.execute(writer, map).flush();
         System.out.println(writer.toString());
     }
+
+    @Test
+    public void test_spilt_package(){
+        String packageName = "cn.cloudtop.sdk.sample.request";
+        System.out.println(packageName);
+        String[] dirs = packageName.split("\\.");
+        System.out.println(dirs.length);
+        for (String dir:dirs){
+            System.out.println(dir);
+        }
+    }
 }

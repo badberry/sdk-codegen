@@ -7,6 +7,35 @@
     <groupId>{{groupId}}</groupId>
     <artifactId>{{artifactId}}</artifactId>
     <version>{{version}}</version>
+    <packaging>jar</packaging>
+
+    <distributionManagement>
+        <repository>
+            <id>user-releases</id>
+            <name>Nexus Internal Releases Repository</name>
+            <url>http://java.dev:8081/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>user-snapshots</id>
+            <name>Nexus Internal Snapshots Repository</name>
+            <url>http://java.dev:8081/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>localNexusRelease</id>
+            <name>Local Nexus Release</name>
+            <url>http://java.dev:8081/nexus/content/groups/local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 
     <dependencies>
         <dependency>
