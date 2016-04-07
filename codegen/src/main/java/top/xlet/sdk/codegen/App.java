@@ -9,13 +9,6 @@ import io.swagger.models.Model;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.Banner;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import top.xlet.sdk.codegen.cmds.Langs;
 import top.xlet.sdk.codegen.define.*;
 
@@ -26,21 +19,26 @@ import java.util.Map;
 /**
  * code gen app.
  */
-@SpringBootApplication
-@EnableAutoConfiguration
-public class App implements CommandLineRunner {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+public class App {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder()
-                .bannerMode(Banner.Mode.OFF)
-                .sources(App.class)
-                .run(args);
+        @SuppressWarnings("unchecked")
+        Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("swagger-codegen-cli")
+                .withDescription("Swagger code generator CLI. More info on swagger.io")
+                .withDefaultCommand(Langs.class)
+                .withCommands(
+                        Generate.class,
+                        //Meta.class,
+                        Langs.class
+                        //Help.class,
+                        //ConfigHelp.class
+                );
+
+        builder.build().parse(args).run();
     }
 
     public void run(String... strings) throws Exception {
-        LOGGER.info("get api docs for codegen");
+        System.out.println("get api docs for codegen");
         String language = "Java";
         String baseDir = "/home/jackie/idea/";
         String url = "http://localhost:8090/v2/api-docs?group=sample";
@@ -62,7 +60,7 @@ public class App implements CommandLineRunner {
 
         List<ApiInfo> apis = Lists.newArrayList();
         for (String key : swagger.getPaths().keySet()) {
-            LOGGER.info("process path {}", key);
+            System.out.println(String.format("process path %s", key));
             Path path = swagger.getPath(key);
             new ApiBuilder()
                     .pojos(pojos)
@@ -72,22 +70,5 @@ public class App implements CommandLineRunner {
                     .build(path);
         }
 
-    }
-
-    private void get(String... args) throws IOException {
-
-        @SuppressWarnings("unchecked")
-        Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("swagger-codegen-cli")
-                .withDescription("Swagger code generator CLI. More info on swagger.io")
-                .withDefaultCommand(Langs.class)
-                .withCommands(
-                        //Generate.class,
-                        //Meta.class,
-                        Langs.class
-                        //Help.class,
-                        //ConfigHelp.class
-                );
-
-        builder.build().parse(args).run();
     }
 }
