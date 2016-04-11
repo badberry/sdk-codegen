@@ -12,15 +12,14 @@ public class GeneratorFactory {
     public static final Map<String, Generator> generatorMap = Maps.newHashMap();
 
     static {
-        generatorMap.put("JavaGenerator", new JavaGenerator());
+        generatorMap.put("JAVA", new JavaGenerator());
     }
 
     public static Generator get(String language) {
-        String key = language + "Generator";
-        if (generatorMap.containsKey(key)) {
-            return generatorMap.get(key);
+        if (generatorMap.containsKey(language)) {
+            return generatorMap.get(language);
         } else {
-            throw new RuntimeException("not support language:" + language);
+            throw new RuntimeException("not support language:" + language.toLowerCase());
         }
     }
 }
