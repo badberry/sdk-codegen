@@ -1,4 +1,6 @@
-package top.xlet.sdk.codegen.define;
+package top.xlet.sdk.codegen.generators;
+
+import top.xlet.sdk.codegen.define.ApiInfo;
 
 import java.io.IOException;
 

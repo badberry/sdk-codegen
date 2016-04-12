@@ -1,11 +1,13 @@
-package top.xlet.sdk.codegen.define;
+package top.xlet.sdk.codegen.generators;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import top.xlet.sdk.codegen.define.ApiInfo;
+import top.xlet.sdk.codegen.define.PojoInfo;
+import top.xlet.sdk.codegen.define.PomDefine;
+import top.xlet.sdk.codegen.define.ViewObjectClassDefine;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,8 +18,6 @@ import java.util.Map;
  * java 代码生成器.
  */
 public class JavaGenerator implements Generator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JavaGenerator.class);
 
     private String projectPath;
     private String sourcePath;
@@ -62,11 +62,8 @@ public class JavaGenerator implements Generator {
 
     @Override
     public void generate(ApiInfo api) throws IOException {
-        LOGGER.info("generate request file");
         this.generateFile("java/request.mustache", api.getRequest());
-        LOGGER.info("generate response file");
         this.generateFile("java/response.mustache", api.getResponse());
-        LOGGER.info("generate vos file");
         for (ViewObjectClassDefine vo : api.getVos()) {
             this.generateFile("java/vo.mustache", vo);
         }
@@ -82,7 +79,6 @@ public class JavaGenerator implements Generator {
 
     private String initPackage(PojoInfo pojoDef) {
         String packagePath = this.sourcePath + File.separator + this.getPackagePath(pojoDef.getPackageName());
-        LOGGER.info("packagePath:" + packagePath);
         File packageDir = new File(packagePath);
         if (!packageDir.exists()) {
             packageDir.mkdirs();
@@ -91,7 +87,6 @@ public class JavaGenerator implements Generator {
     }
 
     private String getPackagePath(String packageName) {
-        LOGGER.info("package is " + packageName);
         String[] dirs = packageName.split("\\.");
         String packagePath = "";
         for (String dir : dirs) {

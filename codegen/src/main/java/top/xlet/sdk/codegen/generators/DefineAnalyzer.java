@@ -1,12 +1,14 @@
-package top.xlet.sdk.codegen.define;
+package top.xlet.sdk.codegen.generators;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.models.Model;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import top.xlet.sdk.codegen.define.PojoInfo;
+import top.xlet.sdk.codegen.define.PropertyInfo;
+import top.xlet.sdk.codegen.define.ResponseClassDefine;
+import top.xlet.sdk.codegen.define.ViewObjectClassDefine;
 
 import java.util.List;
 import java.util.Map;
@@ -15,8 +17,6 @@ import java.util.Map;
  * Created by jackie on 16-4-5
  */
 public class DefineAnalyzer {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefineAnalyzer.class);
 
     private Map<String, Model> definitions;
     private String basePackage;
@@ -44,7 +44,6 @@ public class DefineAnalyzer {
         for (String className : definitions.keySet()) {
             Model model = definitions.get(className);
             String desc = model.getDescription();
-            LOGGER.debug("get definition:{},desc:{}", className, desc);
 
             List<PropertyInfo> classProperties = Lists.newArrayList();
             Map<String, Property> properties = model.getProperties();
@@ -54,7 +53,6 @@ public class DefineAnalyzer {
                 PropertyInfo propertyDef;
                 if (property instanceof RefProperty) {
                     String propertyType = ((RefProperty) property).getSimpleRef();
-                    LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, propertyType, propertyDesc);
                     propertyDef = new PropertyInfo(propertyName, propertyType, propertyDesc);
                     referenceProperties.add(propertyDef);
                 } else {
@@ -63,7 +61,6 @@ public class DefineAnalyzer {
                         propertyType = property.getFormat();
                     }
                     String languageType = generator.getType(propertyType);
-                    LOGGER.debug("get reference property:name={},type={},desc={}", propertyName, languageType, propertyDesc);
                     propertyDef = new PropertyInfo(propertyName, languageType, propertyDesc);
                 }
                 classProperties.add(propertyDef);
@@ -73,12 +70,10 @@ public class DefineAnalyzer {
                 String packageName = this.basePackage + ".responses";
                 ResponseClassDefine responseClass = new ResponseClassDefine(packageName, className, desc, classProperties);
                 definitionMap.put(className, responseClass);
-                LOGGER.info(responseClass.toString());
             } else {
                 String packageName = this.basePackage + ".vos";
                 ViewObjectClassDefine vo = new ViewObjectClassDefine(packageName, className, desc, classProperties);
                 definitionMap.put(className, vo);
-                LOGGER.info(vo.toString());
             }
         }
 
@@ -88,7 +83,7 @@ public class DefineAnalyzer {
                 PojoInfo ref = definitionMap.get(type);
                 propertyDef.setRef(ref);
             } else {
-                LOGGER.error("reference type={} not found!", type);
+                throw new RuntimeException(String.format("reference type=%s not found!", type));
             }
         }
         return definitionMap;

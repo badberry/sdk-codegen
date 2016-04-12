@@ -1,4 +1,4 @@
-package top.xlet.sdk.codegen.define;
+package top.xlet.sdk.codegen.generators;
 
 import com.google.common.collect.Maps;
 

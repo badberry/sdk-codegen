@@ -1,4 +1,4 @@
-package top.xlet.sdk.codegen.define;
+package top.xlet.sdk.codegen.generators;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -8,8 +8,7 @@ import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.properties.RefProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import top.xlet.sdk.codegen.define.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,8 +18,6 @@ import java.util.Map;
  * Created by jackie on 16-4-1
  */
 public class ApiBuilder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiBuilder.class);
 
     private Map<String, PojoInfo> pojos;
     private String url;
@@ -73,7 +70,7 @@ public class ApiBuilder {
         List<ViewObjectClassDefine> vos = this.vos(request, response);
 
         ApiInfo api = new ApiInfo(this.url, name, request, response, vos);
-        LOGGER.info(api.toString());
+        System.out.println(api.toString());
         generator.generate(api);
     }
 

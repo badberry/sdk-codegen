@@ -5,12 +5,18 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
+import io.swagger.models.Model;
+import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
-import top.xlet.sdk.codegen.define.Generator;
-import top.xlet.sdk.codegen.define.GeneratorFactory;
+import top.xlet.sdk.codegen.define.*;
+import top.xlet.sdk.codegen.generators.ApiBuilder;
+import top.xlet.sdk.codegen.generators.DefineAnalyzer;
+import top.xlet.sdk.codegen.generators.Generator;
+import top.xlet.sdk.codegen.generators.GeneratorFactory;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  *
@@ -35,6 +41,9 @@ public class Generate implements Runnable {
 
     @Option(name = {"-p", "--port"}, title = "port", description = "service listening port(80 by default)")
     private String port = "80";
+
+    @Option(name = {"-pg", "--package"}, title = "package", description = "base package for sdk")
+    private String pack = "cn.cloudtop.sdk";
 
     @Override
     public void run() {
@@ -63,28 +72,27 @@ public class Generate implements Runnable {
             }
             Generator generator = GeneratorFactory.get(this.lang.toUpperCase());
             generator.initProject(this.output, this.service, swagger.getInfo().getVersion());
+
+            String packageName = String.format("%s.%s", this.pack, this.service);
+            Map<String, Model> definitions = swagger.getDefinitions();
+            Map<String, PojoInfo> pojos = new DefineAnalyzer()
+                    .definitions(definitions)
+                    .basePackage(packageName)
+                    .generator(generator)
+                    .build();
+
+            for (String key : swagger.getPaths().keySet()) {
+                System.out.println(String.format("process path %s", key));
+                Path path = swagger.getPath(key);
+                new ApiBuilder()
+                        .pojos(pojos)
+                        .basePackage(packageName)
+                        .path(key)
+                        .generator(generator)
+                        .build(path);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
-
-//        Map<String, Model> definitions = swagger.getDefinitions();
-//        Map<String, PojoInfo> pojos = new DefineAnalyzer()
-//                .definitions(definitions)
-//                .basePackage("cn.cloudtop.sdk.sample")
-//                .generator(generator)
-//                .build();
-//
-//        List<ApiInfo> apis = Lists.newArrayList();
-//        for (String key : swagger.getPaths().keySet()) {
-//            System.out.println(String.format("process path %s", key));
-//            Path path = swagger.getPath(key);
-//            new ApiBuilder()
-//                    .pojos(pojos)
-//                    .basePackage("cn.cloudtop.sdk.sample")
-//                    .path(key)
-//                    .generator(generator)
-//                    .build(path);
-//        }
     }
 }
