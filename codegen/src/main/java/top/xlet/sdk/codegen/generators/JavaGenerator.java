@@ -27,7 +27,11 @@ public class JavaGenerator implements Generator {
         baseTypeMap = Maps.newHashMap();
         baseTypeMap.put("int64", "long");
         baseTypeMap.put("string", "String");
-        //todo: add other base type map.
+        baseTypeMap.put("boolean","boolean");
+        baseTypeMap.put("byte","byte");
+        baseTypeMap.put("double","double");
+        baseTypeMap.put("float","float");
+        baseTypeMap.put("int32","int");
     }
 
     @Override

@@ -23,6 +23,8 @@ public class ApiBuilder {
     private String url;
     private String basePackage;
     private Generator generator;
+    private HttpMethod method;
+    private Operation operation;
 
     public ApiBuilder pojos(Map<String, PojoInfo> pojos) {
         this.pojos = pojos;
@@ -34,8 +36,8 @@ public class ApiBuilder {
         return this;
     }
 
-    public ApiBuilder path(String path) {
-        this.url = path;
+    public ApiBuilder url(String url) {
+        this.url = url;
         return this;
     }
 
@@ -44,29 +46,27 @@ public class ApiBuilder {
         return this;
     }
 
-    public void build(Path path) throws IOException {
-        Map<HttpMethod, Operation> operationMap = path.getOperationMap();
-        if (operationMap.size() > 1) {
-            throw new RuntimeException(String.format("api %s not set method", this.url));
-        }
+    public ApiBuilder method(HttpMethod method){
+        this.method = method;
+        return this;
+    }
 
-        HttpMethod apiMethod = null;
-        Operation apiOperation = null;
-        for (HttpMethod method : operationMap.keySet()) {
-            apiMethod = method;
-            apiOperation = operationMap.get(method);
-        }
+    public ApiBuilder operation(Operation operation){
+        this.operation = operation;
+        return this;
+    }
 
-        if (apiMethod == null || apiOperation == null) {
+    public void build() throws IOException {
+        if (this.method== null || this.operation== null) {
             throw new RuntimeException("method or operation is null!");
         }
 
-        String name = apiOperation.getSummary();
-        String desc = apiOperation.getDescription();
-        String method = apiMethod.toString();
+        String name = this.operation.getSummary();
+        String desc = this.operation.getDescription();
+        String method = this.method.toString();
 
-        ResponseClassDefine response = this.response(apiOperation);
-        RequestClassDefine request = this.request(apiOperation, method, desc);
+        ResponseClassDefine response = this.response(this.operation);
+        RequestClassDefine request = this.request(this.operation, method, desc);
         List<ViewObjectClassDefine> vos = this.vos(request, response);
 
         ApiInfo api = new ApiInfo(this.url, name, request, response, vos);

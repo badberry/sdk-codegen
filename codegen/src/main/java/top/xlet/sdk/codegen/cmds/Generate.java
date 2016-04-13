@@ -5,9 +5,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
-import io.swagger.models.Model;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.parser.SwaggerParser;
 import top.xlet.sdk.codegen.define.*;
 import top.xlet.sdk.codegen.generators.ApiBuilder;
@@ -50,12 +48,12 @@ public class Generate implements Runnable {
         System.out.println(String.format("params:l=%s,o=%s,s=%s,h=%s,p=%s",
                 this.lang, this.output, this.service, this.host, this.port));
 
-        String url = String.format("http://%s:%s/v2/api-docs?group=%s", this.host, this.port, this.service);
+        String apiDocUrl = String.format("http://%s:%s/v2/api-docs?group=%s", this.host, this.port, this.service);
 
-        System.out.println(String.format("get api docs form %s", url));
+        System.out.println(String.format("get api docs form %s", apiDocUrl));
         try {
             OkHttpClient client = new OkHttpClient();
-            Response response = client.newCall(new Request.Builder().url(url).get().build()).execute();
+            Response response = client.newCall(new Request.Builder().url(apiDocUrl).get().build()).execute();
             if (response.code() == 200) {
                 System.out.println("get api docs success,try to analyse api docs");
             } else {
@@ -81,15 +79,23 @@ public class Generate implements Runnable {
                     .generator(generator)
                     .build();
 
-            for (String key : swagger.getPaths().keySet()) {
-                System.out.println(String.format("process path %s", key));
-                Path path = swagger.getPath(key);
+            for (String url : swagger.getPaths().keySet()) {
+                System.out.println(String.format("process url %s", url));
+                Path path = swagger.getPath(url);
+                Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+                if (operationMap.size() > 1) {
+                    throw new RuntimeException(String.format("api %s not set method", url));
+                }
+                HttpMethod httpMethod = operationMap.keySet().toArray(new HttpMethod[operationMap.size()])[0];
+                Operation operation = operationMap.values().toArray(new Operation[operationMap.size()])[0];
                 new ApiBuilder()
                         .pojos(pojos)
                         .basePackage(packageName)
-                        .path(key)
+                        .url(url)
                         .generator(generator)
-                        .build(path);
+                        .method(httpMethod)
+                        .operation(operation)
+                        .build();
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
