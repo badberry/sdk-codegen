@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>{{groupId}}</groupId>
+    <artifactId>{{artifactId}}</artifactId>
+    <version>{{version}}</version>
+    <packaging>jar</packaging>
+
+    <distributionManagement>
+        <repository>
+            <id>user-releases</id>
+            <name>Nexus Internal Releases Repository</name>
+            <url>http://java.dev:8081/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>user-snapshots</id>
+            <name>Nexus Internal Snapshots Repository</name>
+            <url>http://java.dev:8081/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>localNexusRelease</id>
+            <name>Local Nexus Release</name>
+            <url>http://java.dev:8081/nexus/content/groups/local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.cloudtop.common</groupId>
+            <artifactId>common-api-basic</artifactId>
+            <version>0.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+    </dependencies>
+</project>
