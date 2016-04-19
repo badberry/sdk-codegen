@@ -19,6 +19,9 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "获取simple", notes = "获取指定id的simple详细内容", nickname = "SimpleGetRequest")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "id",value = "sample唯一标识")
+    )
     @RequestMapping(value = "simple/{id:\\d+}", method = RequestMethod.GET, produces = "application/json")
     public SimpleCreateResponse get(@PathVariable("id") long id) {
         return new SimpleCreateResponse(new SimpleVo());
